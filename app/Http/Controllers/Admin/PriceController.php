@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Price;
+use Illuminate\Http\Request;
+
+class PriceController extends Controller
+{
+    public function index()
+    {
+        $prices = Price::all();
+        return view('admin.payments.harga', compact('prices'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'price' => 'required|numeric',
+            'registration_fee' => 'required|numeric',
+            'description' => 'nullable|string',
+        ]);
+
+        $price = Price::findOrFail($id);
+        $price->update($request->all());
+
+        return redirect()->back()->with('success', 'Harga kategori ' . $price->category . ' berhasil diperbarui!');
+    }
+}
