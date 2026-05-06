@@ -39,62 +39,68 @@ class MemberController extends Controller
     }
 
 public function approve($id)
-    {
-        $member = Member::findOrFail($id);
-        $payment = Payment::where('member_id', $member->id)->where('status', 'pending')->latest()->first();
+{
+    $member = Member::findOrFail($id);
+    // Ambil pembayaran pending terakhir
+    $payment = Payment::where('member_id', $member->id)
+                      ->where('status', 'pending')
+                      ->latest()
+                      ->first();
 
-        if (!$payment) {
-            return redirect()->back()->with('error', 'Data pembayaran pending tidak ditemukan.');
-        }
-
-        $now = now();
-        $durationMonths = $payment->duration ?? 1; 
-
-        // Logika Akumulasi: Jika belum expired, tambah dari tanggal expiry. Jika sudah, tambah dari sekarang.
-        $currentExpiry = $member->membership_expiry ? Carbon::parse($member->membership_expiry) : $now;
-        $startDate = $currentExpiry->gt($now) ? $currentExpiry : $now;
-        $newExpiry = $startDate->addMonths($durationMonths);
-
-        $member->update([
-            'status' => 'active',
-            'membership_expiry' => $newExpiry
-        ]);
-
-        $payment->update(['status' => 'approved']);
-
-        return redirect()->back()->with('success', "Pembayaran disetujui. Masa aktif bertambah $durationMonths bulan.");
+    if (!$payment) {
+        return redirect()->back()->with('error', 'Data pembayaran pending tidak ditemukan.');
     }
 
-    /**
-     * Menolak Pembayaran (Graceful Reject)
-     */
-    public function reject($id)
-    {
-        $member = Member::findOrFail($id);
-        $now = now();
+    $now = now();
+    // Pastikan mengambil duration dari tabel payments
+    $durationMonths = $payment->duration; 
 
-        // 1. Ambil pembayaran pending terakhir
-        $payment = Payment::where('member_id', $member->id)
-                          ->where('status', 'pending')
-                          ->latest()
-                          ->first();
+    // Logika Akumulasi Tanggal Expiry
+    // Jika masih aktif (expiry > now), kita tambah dari tanggal expiry lama
+    // Jika sudah mati (expiry < now atau null), kita tambah dari hari ini
+    $currentExpiry = $member->membership_expiry ? Carbon::parse($member->membership_expiry) : null;
+    
+    $startDate = ($currentExpiry && $currentExpiry->gt($now)) ? $currentExpiry : $now;
+    $newExpiry = $startDate->addMonths($durationMonths);
 
-        // 2. Cek apakah member sebenarnya masih punya masa aktif sah dari pembayaran sebelumnya?
-        $isStillActive = $member->membership_expiry && Carbon::parse($member->membership_expiry)->gt($now);
+    $member->update([
+        'status' => 'active',
+        'membership_expiry' => $newExpiry
+    ]);
 
-        // Jika pendaftaran awal (belum ada hp) atau masa aktif sudah habis, kembalikan ke inactive
-        // Jika dia member aktif yang sedang perpanjang tapi buktinya salah, statusnya tetap active (tidak rugi)
-        if (!$isStillActive || empty($member->phone_number)) {
-            $member->update(['status' => 'inactive']);
-        }
+    // Update status pembayaran menjadi approved/success
+    $payment->update(['status' => 'approved']);
 
-        // 3. Update status pembayaran menjadi Rejected
-        if ($payment) {
-            $payment->update(['status' => 'rejected']);
-        }
+    return redirect()->back()->with('success', "Pembayaran disetujui. Masa aktif member {$member->user->name} bertambah {$durationMonths} bulan.");
+}
 
-        return redirect()->back()->with('success', 'Pembayaran ditolak. Member diberitahukan untuk upload ulang.');
+public function reject($id)
+{
+    $member = Member::findOrFail($id);
+    $now = now();
+
+    $payment = Payment::where('member_id', $member->id)
+                      ->where('status', 'pending')
+                      ->latest()
+                      ->first();
+
+    if ($payment) {
+        $payment->update(['status' => 'rejected']);
     }
+
+    // LOGIKA KEAMANAN STATUS:
+    // Cek apakah sebenarnya dia masih punya masa aktif yang sah?
+    $isStillActive = $member->membership_expiry && Carbon::parse($member->membership_expiry)->gt($now);
+
+    // HANYA ubah ke inactive jika masa aktifnya memang sudah habis atau dia pendaftaran baru
+    if (!$isStillActive) {
+        $member->update(['status' => 'inactive']);
+    } 
+    // Jika $isStillActive bernilai TRUE, status member dibiarkan 'active' 
+    // agar dia tetap bisa masuk gym meski perpanjangannya ditolak.
+
+    return redirect()->back()->with('success', 'Pembayaran ditolak. Member tetap pada status sebelumnya.');
+}
 
     public function updateStatus(Request $request, $id)
     {

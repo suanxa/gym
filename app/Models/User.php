@@ -2,28 +2,31 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-// use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\MustVerifyEmail; // TAMBAHKAN INI
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'email', 'password', 'role', 'google_id'])] // Tambahkan role dan google_id 
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail // TAMBAHKAN IMPLEMENTS
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'google_id'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -32,39 +35,13 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Relasi ke profil Member (One-to-One)
-     * 
-     */
     public function member(): HasOne
     {
         return $this->hasOne(Member::class);
     }
 
-    /**
-     * Relasi ke data Pembayaran (One-to-Many)
-     * 
-     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
-    }
-
-    /**
-     * Relasi ke data Kehadiran/Absensi (One-to-Many)
-     * 
-     */
-    public function presences(): HasMany
-    {
-        return $this->hasMany(Presence::class);
-    }
-
-    /**
-     * Relasi ke data Review/Ulasan (One-to-Many)
-     * 
-     */
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(Review::class);
     }
 }

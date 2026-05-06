@@ -132,8 +132,8 @@
                                 <div x-show="selectedMember.type == 'pelajar'">
                                     <p class="text-[10px] text-orange-600 uppercase font-black mb-1">Kartu Pelajar</p>
                                     <template x-if="selectedMember.student_card">
-                                        <a :href="`{{ asset('storage') }}/${selectedMember.student_card}`" target="_blank">
-                                            <img :src="`{{ asset('storage') }}/${selectedMember.student_card}`" 
+                                        <a :href="`{{ asset('') }}${selectedMember.student_card}`" target="_blank">
+                                                <img :src="`{{ asset('') }}${selectedMember.student_card}`" 
                                                  class="w-full h-32 object-cover rounded-xl border-2 border-orange-100 hover:border-orange-400 transition">
                                         </a>
                                     </template>
@@ -143,8 +143,8 @@
                                 <div>
                                     <p class="text-[10px] text-blue-600 uppercase font-black mb-1">Bukti Transfer Terbaru</p>
                                     <template x-if="selectedMember.payments && selectedMember.payments.length > 0">
-                                        <a :href="`{{ asset('storage') }}/${selectedMember.payments[0].proof_of_payment}`" target="_blank">
-                                            <img :src="`{{ asset('storage') }}/${selectedMember.payments[0].proof_of_payment}`" 
+                                        <a :href="`{{ asset('') }}${selectedMember.payments[0].proof_of_payment}`" target="_blank">
+                                                <img :src="`{{ asset('') }}${selectedMember.payments[0].proof_of_payment}`"
                                                  class="w-full h-40 object-cover rounded-xl border-2 border-blue-100 hover:border-blue-400 transition">
                                         </a>
                                     </template>

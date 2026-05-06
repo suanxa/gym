@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\Auth\GoogleController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 // Import Controller Admin
 use App\Http\Controllers\Admin\MemberController as AdminMember;
@@ -118,5 +121,31 @@ Route::middleware('auth')->group(function () {
 // Google Socialite
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
+
+/*
+|--------------------------------------------------------------------------
+| Email Verification Routes (Custom Landing Page)
+|--------------------------------------------------------------------------
+*/
+
+// Rute ini menangani klik link dari email user
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    // 1. Cari user berdasarkan ID dari link
+    $user = User::find($id);
+
+    // 2. Validasi apakah user ada dan hash-nya cocok
+    if (!$user || !hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        abort(403, 'Link verifikasi tidak valid.');
+    }
+
+    // 3. Jika belum diverifikasi, proses verifikasi
+    if (!$user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+        event(new \Illuminate\Auth\Events\Verified($user));
+    }
+
+    // 4. Tampilkan halaman sukses buatanmu
+    return view('auth.verified'); 
+})->middleware(['signed'])->name('verification.verify');
 
 require __DIR__.'/auth.php';

@@ -64,7 +64,8 @@
                                 <th class="px-6 py-3 text-center">Jenis Pelanggan</th> 
                                 <th class="px-6 py-3">Kategori Layanan</th>
                                 <th class="px-6 py-3">Nominal</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Bukti</th> <!-- Tambah kolom ini -->
+                                <th class="px-6 py-3 text-center">Status & Aksi</th> <!-- Edit kolom ini -->
                             </tr>
                         </thead>
                         <tbody>
@@ -75,7 +76,6 @@
                                     {{ $payment->user->name ?? $payment->external_customer_name }}
                                 </td>
                                 
-                                {{-- LOGIKA JENIS PELANGGAN --}}
                                 <td class="px-6 py-4 text-center">
                                     @if($payment->user_id)
                                         <span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider {{ $payment->user->member?->type == 'pelajar' ? 'bg-orange-100 text-orange-700 border border-orange-200' : 'bg-blue-100 text-blue-700 border border-blue-200' }}">
@@ -90,15 +90,43 @@
 
                                 <td class="px-6 py-4 italic text-xs text-gray-600">{{ $payment->description ?? 'Iuran Membership' }}</td>
                                 <td class="px-6 py-4 text-gray-900 font-black">Rp {{ number_format($payment->amount) }}</td>
+
+                                <!-- BAGIAN PERBAIKAN GAMBAR -->
                                 <td class="px-6 py-4">
-                                    <span class="px-2 py-1 rounded text-[10px] font-bold {{ $payment->status == 'verified' ? 'bg-green-500 text-white' : 'bg-yellow-400 text-white' }}">
-                                        {{ strtoupper($payment->status) }}
-                                    </span>
+                                    @if($payment->proof_of_payment)
+                                        {{-- Menggunakan asset() agar langsung ke folder public/uploads tanpa lewat folder storage --}}
+                                        <a href="{{ asset($payment->proof_of_payment) }}" target="_blank">
+                                            <img src="{{ asset($payment->proof_of_payment) }}" 
+                                                class="w-12 h-12 object-cover rounded shadow-sm border border-gray-200 hover:scale-125 transition" 
+                                                alt="Bukti">
+                                        </a>
+                                    @else
+                                        <span class="text-gray-300 italic text-[10px]">Cash/Manual</span>
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex flex-col gap-2 items-center">
+                                        <span class="px-2 py-1 rounded text-[10px] font-bold {{ $payment->status == 'verified' ? 'bg-green-500 text-white' : 'bg-yellow-400 text-white' }}">
+                                            {{ strtoupper($payment->status) }}
+                                        </span>
+
+                                        {{-- Tombol Verifikasi hanya muncul jika status masih pending --}}
+                                        @if($payment->status == 'pending')
+                                            <form action="{{ route('admin.payments.verify', $payment->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-[9px] bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded font-bold transition">
+                                                    Verifikasi Sekarang
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center italic text-gray-400">Belum ada transaksi pembayaran.</td>
+                                <td colspan="7" class="px-6 py-4 text-center italic text-gray-400">Belum ada transaksi pembayaran.</td>
                             </tr>
                             @endforelse
                         </tbody>

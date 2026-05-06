@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,8 +19,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot()
     {
-        //
+        VerifyEmail::toMailUsing(function ($notifiable, $url) {
+            return (new MailMessage)
+                ->subject('Verifikasi Email Piai Wellness')
+                ->line('Klik tombol di bawah ini untuk mengaktifkan akun Anda.')
+                ->action('Verifikasi Akun', $url) // URL ini tetap ke Laravel
+                ->line('Jika Anda tidak merasa mendaftar, abaikan email ini.');
+        });
     }
 }
