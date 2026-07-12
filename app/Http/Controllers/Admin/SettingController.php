@@ -26,11 +26,17 @@ class SettingController extends Controller
             'address' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'banner' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            
+            // --- TAMBAHAN VALIDASI BARU ---
+            'bank_name' => 'nullable|string|max:255',
+            'bank_account' => 'nullable|string',
+            'qris_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Batas 2MB
         ]);
 
         $setting = Setting::first() ?? new Setting();
         
-        $data = $request->except(['logo', 'banner']);
+        // Ambil semua inputan kecuali berkas file media agar tidak tabrakan
+        $data = $request->except(['logo', 'banner', 'qris_image']);
 
         // Handle Upload Logo
         if ($request->hasFile('logo')) {
@@ -44,7 +50,16 @@ class SettingController extends Controller
             $data['banner'] = $request->file('banner')->store('settings', 'public');
         }
 
-        // Simpan data (update jika ada, create jika tidak ada)
+        // --- BARU: Handle Upload Gambar QRIS ---
+        if ($request->hasFile('qris_image')) {
+            // Hapus gambar QRIS lama dari folder storage jika ada
+            if ($setting->qris_image) Storage::disk('public')->delete($setting->qris_image);
+            
+            // Simpan gambar QRIS baru ke folder storage/settings
+            $data['qris_image'] = $request->file('qris_image')->store('settings', 'public');
+        }
+
+        // Simpan data (update jika ada, create jika tidak ada baris ID 1)
         Setting::updateOrCreate(['id' => 1], $data);
 
         return redirect()->back()->with('success', 'Pengaturan website berhasil diperbarui!');

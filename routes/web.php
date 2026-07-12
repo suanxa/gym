@@ -76,6 +76,7 @@ Route::middleware(['auth', RoleMiddleware::class])->prefix('admin')->name('admin
     // Catatan Pengeluaran Fasilitas (Tabel 3.7 Laporan)
     Route::get('/expenses', [AdminExpense::class, 'index'])->name('expenses.index');
     Route::post('/expenses', [AdminExpense::class, 'store'])->name('expenses.store');
+    Route::delete('/expenses/{id}', [AdminExpense::class, 'destroy'])->name('expenses.destroy');
 
     // Kelola Review Landing Page
     Route::get('/reviews', [AdminReview::class, 'index'])->name('reviews.index');
@@ -132,6 +133,14 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
     // 1. Cari user berdasarkan ID dari link
     $user = User::find($id);
+
+    \Log::info([
+        'id' => $id,
+        'email' => $user?->email,
+        'hash_url' => $hash,
+        'hash_db' => $user ? sha1($user->getEmailForVerification()) : null,
+        'hasValidSignature' => $request->hasValidSignature(),
+    ]);
 
     // 2. Validasi apakah user ada dan hash-nya cocok
     if (!$user || !hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {

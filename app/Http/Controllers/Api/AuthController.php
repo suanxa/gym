@@ -7,8 +7,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use App\Models\Presence;
+use App\Models\Review;
+use App\Models\Setting;
+
 class AuthController extends Controller
 {
     // REGISTER CEPAT (Nama, Email, Password)
@@ -29,9 +33,17 @@ class AuthController extends Controller
                     'password' => Hash::make($request->password),
                     'role' => 'member',
                 ]);
-
+                \Log::info('Email tujuan: ' . $user->email);
                 // 2. Kirim Notifikasi Verifikasi Email
-                $user->sendEmailVerificationNotification();
+                try {
+    $user->sendEmailVerificationNotification();
+
+    \Log::info('Email verification berhasil dipanggil');
+} catch (\Throwable $e) {
+    \Log::error('Gagal kirim email: ' . $e->getMessage());
+
+    throw $e;
+}
 
                 return response()->json([
                     'status' => 'success',
@@ -197,6 +209,28 @@ class AuthController extends Controller
         }
     }
 
+    public function getPaymentMethod()
+{
+    try {
+        $setting = Setting::first();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'bank_name' => $setting->bank_name ?? 'Belum Diatur',
+                'bank_account' => $setting->bank_account ?? 'Belum Diatur',
+                // Perhatikan: Tambahkan 'storage/' sebelum memanggil path gambar
+                'qris_image' => $setting->qris_image ? asset('storage/' . $setting->qris_image) : null,
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal memuat metode pembayaran: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
     public function checkIn(Request $request) 
     {
         try {
@@ -241,6 +275,119 @@ class AuthController extends Controller
                     ->get();
         return response()->json(['status' => 'success', 'data' => $stats]);
     }
+
+    public function storeReview(Request $request)
+{
+    $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'comment' => 'required|string',
+    ]);
+
+    try {
+        $user = $request->user();
+
+        $review = Review::create([
+            'user_id' => $user->id,
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+            'is_published' => false, // Default false, menunggu approval admin di web
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Ulasan berhasil dikirim dan menunggu verifikasi admin!',
+            'data' => $review
+        ], 201);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal menyimpan ulasan: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+    public function profile(Request $request)
+{
+    $user = $request->user();
+    
+    return response()->json([
+        'status' => 'success',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'member_info' => $user->member, // Mengambil data relasi member terbaru
+            'last_payment_status' => $user->payments()->latest()->value('status')
+        ]
+    ]);
+}
+
+public function updateProfile(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'phone_number' => 'required|string|max:20',
+        'address' => 'required|string',
+        'gender' => 'required|in:L,P',
+        'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+    ]);
+
+    try {
+        $user = $request->user();
+        
+        // 1. Update nama di tabel users
+        $user->update(['name' => $request->name]);
+
+        // 2. Siapkan data untuk tabel members
+        $memberData = [
+            'phone_number' => $request->phone_number,
+            'address' => $request->address,
+            'gender' => $request->gender,
+        ];
+
+        // 3. Handle upload foto profil jika ada berkas baru
+        if ($request->hasFile('profile_picture')) {
+            $member = $user->member;
+            
+            // Hapus foto lama jika ada agar tidak memenuhi storage laptop
+            if ($member && $member->profile_picture && File::exists(public_path($member->profile_picture))) {
+                File::delete(public_path($member->profile_picture));
+            }
+
+            $file = $request->file('profile_picture');
+            $filename = time() . '_profile_' . Str::slug($user->name) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/profile'), $filename);
+            
+            // Simpan path ke dalam array data
+            $memberData['profile_picture'] = 'uploads/profile/' . $filename;
+        }
+
+        // 4. Update atau create data di tabel members
+        $user->member()->updateOrCreate(
+            ['user_id' => $user->id],
+            $memberData
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Profil berhasil diperbarui!',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'member_info' => $user->member()->first(), 
+                'last_payment_status' => $user->payments()->latest()->value('status')
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal memperbarui profil: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     public function logout(Request $request)
     {

@@ -46,11 +46,18 @@
                                         <span class="font-bold {{ $member->status == 'active' ? 'text-green-600' : 'text-red-600' }}">
                                             {{ strtoupper($member->status) }}
                                         </span>
-                                        {{-- Indikator jika ada pembayaran pending (perpanjangan) --}}
+                                        
+                                        {{-- Indikator Pintar: Membedakan Member Baru vs Perpanjangan --}}
                                         @if($member->payments->first() && $member->payments->first()->status == 'pending')
-                                            <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-black animate-pulse mt-1 w-fit">
-                                                ADA PERPANJANGAN
-                                            </span>
+                                            @if($member->status == 'active')
+                                                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-black animate-pulse mt-1 w-fit">
+                                                    ADA PERPANJANGAN
+                                                </span>
+                                            @else
+                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-black animate-pulse mt-1 w-fit">
+                                                    AKTIVASI BARU
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </td>

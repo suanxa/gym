@@ -10,20 +10,31 @@ class ExpenseController extends Controller
 {
     public function index()
     {
+        // Ambil data pengeluaran terbaru
         $expenses = Expense::latest()->get();
         return view('admin.expenses.index', compact('expenses'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'item_name' => 'required',
-            'amount' => 'required|numeric',
+        $request->validate([
+            'item_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date',
-            'category' => 'required'
+            'category' => 'required|in:equipment,maintenance,utility,other',
+            'note' => 'nullable|string',
         ]);
 
-        Expense::create($validated);
-        return redirect()->back()->with('success', 'Pengeluaran berhasil dicatat');
+        Expense::create($request->all());
+
+        return redirect()->back()->with('success', 'Catatan pengeluaran berhasil ditambahkan!');
+    }
+
+    public function destroy($id)
+    {
+        $expense = Expense::findOrFail($id);
+        $expense->delete();
+
+        return redirect()->back()->with('success', 'Catatan pengeluaran berhasil dihapus!');
     }
 }

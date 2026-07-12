@@ -8,7 +8,7 @@ class Member extends Model
 {
     protected $fillable = [
     'user_id', 'phone_number', 'address','date_of_birth', 'gender',
-    'type', 'student_card', 'status', 'membership_expiry'
+    'type', 'student_card', 'status', 'membership_expiry', 'profile_picture',
 ];
 
 public function user() {
