@@ -1,73 +1,76 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Catatan Pengeluaran Fasilitas') }}
-        </h2>
-    </x-slot>
+    {{-- FORCE GLOBAL STYLE UNTUK SINKRONISASI TEMA TERANG/GELAP --}}
+    <style>
+        .dark body, .dark main, .dark .min-h-screen { 
+            background-color: #030712 !important; 
+        }
+        body, main, .min-h-screen { 
+            background-color: #f3f4f6 !important; 
+            transition: background-color 0.2s ease;
+        }
+    </style>
 
-    <div class="py-12" x-data="{ openModal: false }">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="p-4 sm:ml-1 bg-gray-100 dark:bg-gray-950 min-h-screen pt-2 text-gray-800 dark:text-gray-100 transition-colors duration-200" x-data="{ openModal: false }">
+        <div class="max-w-7xl mx-auto space-y-6">
             
-            {{-- Flash Message Notifikasi --}}
+            {{-- HEADER MODUL --}}
+            <div class="p-6 bg-gradient-to-r from-white via-slate-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/40 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-black tracking-wide text-gray-900 dark:text-white uppercase">
+                        Catatan <span class="text-indigo-600 dark:text-indigo-400">Pengeluaran</span>
+                    </h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Monitoring operasional dan biaya pemeliharaan fasilitas Piai Futsal Fitness.</p>
+                </div>
+                <button @click="openModal = true" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-5 rounded-xl transition shadow-md shadow-indigo-600/20 text-xs uppercase tracking-wide">
+                    + Tambah Item Pengeluaran
+                </button>
+            </div>
+
             @if(session('success'))
-                <div class="mb-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200 font-bold">
+                <div class="p-4 text-sm text-green-800 dark:text-green-400 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 font-bold shadow-sm">
                     {{ session('success') }}
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-gray-800">Daftar Pengeluaran Piai Futsal Fitness</h3>
-                    {{-- Tombol Tambah --}}
-                    <button @click="openModal = true" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl text-xs uppercase shadow transition">
-                        + Tambah Pengeluaran
-                    </button>
-                </div>
-                
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            {{-- TABEL DATA --}}
+            <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
                             <tr>
-                                <th class="px-6 py-3">Nama Item</th>
-                                <th class="px-6 py-3">Kategori</th>
-                                <th class="px-6 py-3">Jumlah (Rp)</th>
-                                <th class="px-6 py-3">Tanggal</th>
-                                <th class="px-6 py-3">Catatan</th>
-                                <th class="px-6 py-3 text-center">Aksi</th>
+                                <th class="px-6 py-4">Nama Item</th>
+                                <th class="px-6 py-4">Kategori</th>
+                                <th class="px-6 py-4">Jumlah (Rp)</th>
+                                <th class="px-6 py-4">Tanggal</th>
+                                <th class="px-6 py-4">Catatan</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
                             @forelse($expenses as $expense)
-                            <tr class="bg-white border-b hover:bg-gray-50">
-                                <td class="px-6 py-4 font-medium text-gray-900">{{ $expense->item_name }}</td>
+                            <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
+                                <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ $expense->item_name }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2 py-1 rounded text-[10px] font-bold 
-                                        {{ $expense->category == 'equipment' ? 'bg-blue-100 text-blue-700' : '' }}
-                                        {{ $expense->category == 'maintenance' ? 'bg-orange-100 text-orange-700' : '' }}
-                                        {{ $expense->category == 'utility' ? 'bg-purple-100 text-purple-700' : '' }}
-                                        {{ $expense->category == 'other' ? 'bg-gray-100 text-gray-700' : '' }}
-                                    ">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider 
+                                        {{ $expense->category == 'equipment' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/60' : '' }}
+                                        {{ $expense->category == 'maintenance' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/60' : '' }}
+                                        {{ $expense->category == 'utility' ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200/60' : '' }}
+                                        {{ $expense->category == 'other' ? 'bg-gray-50 dark:bg-gray-700/40 text-gray-600 dark:text-gray-300 border border-gray-200' : '' }}">
                                         {{ strtoupper($expense->category) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 font-bold text-gray-800">Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4 text-xs">{{ \Carbon\Carbon::parse($expense->expense_date)->translatedFormat('d M Y') }}</td>
-                                <td class="px-6 py-4 text-xs text-gray-400">{{ $expense->note ?? '-' }}</td>
+                                <td class="px-6 py-4 font-black font-mono text-gray-900 dark:text-white">Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
+                                <td class="px-6 py-4 text-xs font-mono text-gray-600 dark:text-gray-300">{{ \Carbon\Carbon::parse($expense->expense_date)->translatedFormat('d M Y') }}</td>
+                                <td class="px-6 py-4 text-xs text-gray-400 dark:text-gray-500 italic">{{ $expense->note ?? '-' }}</td>
                                 <td class="px-6 py-4 text-center">
-                                    {{-- Form Hapus --}}
-                                    <form action="{{ route('admin.expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pengeluaran ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs uppercase tracking-tighter">
-                                            Hapus
-                                        </button>
+                                    <form action="{{ route('admin.expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus catatan ini?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 font-bold text-xs uppercase tracking-tighter">Hapus</button>
                                     </form>
                                 </td>
                             </tr>
                             @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-4 text-center italic text-gray-400">Belum ada data pengeluaran.</td>
-                            </tr>
+                            <tr><td colspan="6" class="px-6 py-12 text-center italic text-gray-400">Belum ada data pengeluaran.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -75,60 +78,49 @@
             </div>
         </div>
 
-        {{-- MODAL TAMBAH PENGELUARAN (ALPINU.JS) --}}
-        <div x-show="openModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-            <div class="flex items-center justify-center min-h-screen p-4 text-center">
-                <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="openModal = false"></div>
-
-                <div class="relative bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:max-w-lg sm:w-full p-6" @click.away="openModal = false">
-                    <div class="flex justify-between items-center border-b pb-3 mb-4">
-                        <h3 class="text-lg font-bold text-gray-900">Tambah Catatan Pengeluaran</h3>
-                        <button @click="openModal = false" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-                    </div>
-
-                    <form action="{{ route('admin.expenses.store') }}" method="POST">
-                        @csrf
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Nama Item / Pengeluaran</label>
-                                <input type="text" name="item_name" required placeholder="Contoh: Service AC, Beli Dumbbell Baru" class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Kategori</label>
-                                    <select name="category" required class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        <option value="equipment">Equipment</option>
-                                        <option value="maintenance">Maintenance</option>
-                                        <option value="utility">Utility</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Tanggal</label>
-                                    <input type="date" name="expense_date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Jumlah Biaya (Rp)</label>
-                                <input type="number" name="amount" required placeholder="Contoh: 150000" class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Catatan Tambahan (Opsional)</label>
-                                <textarea name="note" rows="3" placeholder="Keterangan opsional..." class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 flex justify-end gap-3 border-t pt-4">
-                            <button type="button" @click="openModal = false" class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 text-xs font-bold uppercase">Batal</button>
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-xs font-bold uppercase shadow">Simpan Data</button>
-                        </div>
-                    </form>
+        {{-- MODAL TAMBAH (DESAIN MODERN) --}}
+        <div x-show="openModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+            <div class="fixed inset-0 bg-gray-950/70 backdrop-blur-sm" @click="openModal = false"></div>
+            <div class="relative bg-white dark:bg-gray-950 rounded-3xl shadow-2xl w-full max-w-lg p-8 border border-gray-200 dark:border-gray-800" @click.away="openModal = false">
+                <div class="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider">Tambah Pengeluaran</h3>
+                    <button @click="openModal = false" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
                 </div>
+                <form action="{{ route('admin.expenses.store') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Nama Item</label>
+                        <input type="text" name="item_name" required class="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-3 text-sm focus:ring-2 focus:ring-indigo-500 dark:text-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Kategori</label>
+                            <select name="category" class="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-3 text-sm dark:text-white">
+                                <option value="equipment">Equipment</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="utility">Utility</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Tanggal</label>
+                            <input type="date" name="expense_date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-3 text-sm dark:text-white font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Jumlah Biaya (Rp)</label>
+                        <input type="number" name="amount" required class="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-3 text-sm dark:text-white font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Catatan</label>
+                        <textarea name="note" rows="2" class="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-3 text-sm dark:text-white"></textarea>
+                    </div>
+                    <div class="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl uppercase text-xs tracking-wider">Simpan</button>
+                        <button type="button" @click="openModal = false" class="px-5 bg-gray-100 dark:bg-gray-900 text-gray-500 font-bold rounded-xl text-xs uppercase">Batal</button>
+                    </div>
+                </form>
             </div>
         </div>
-
     </div>
 </x-app-layout>
