@@ -40,17 +40,25 @@ class="bg-white dark:bg-gray-950/90 backdrop-blur-md border-b border-gray-100 da
                     @endphp
                     
                     <a href="{{ route($dashboardRoute) }}" class="flex items-center gap-2.5 group">
-                        @if($siteSetting && $siteSetting->logo)
-                            <img src="{{ asset('storage/' . $siteSetting->logo) }}" class="block h-9 w-auto rounded-lg transition duration-200 group-hover:scale-105">
-                        @else
-                            <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-md shadow-red-600/40 transition duration-200 group-hover:scale-105">
-                                P
-                            </div>
-                        @endif
-                        <span class="text-sm font-black tracking-wider text-gray-900 dark:text-white transition duration-200 group-hover:text-red-600">
-                            PIAI <span class="text-red-600">WELLNESS</span>
-                        </span>
-                    </a>
+    @if($siteSetting && $siteSetting->logo)
+        <img src="{{ asset('storage/' . $siteSetting->logo) }}" class="block h-9 w-auto rounded-lg transition duration-200 group-hover:scale-105">
+    @else
+        <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-md shadow-red-600/40 transition duration-200 group-hover:scale-105">
+            {{ substr($siteSetting->site_name ?? 'P', 0, 1) }}
+        </div>
+    @endif
+    
+    <span class="text-sm font-black tracking-wider text-gray-900 dark:text-white transition duration-200 group-hover:text-red-600">
+        {{-- Kita pecah nama menjadi dua agar tetap bisa pakai warna merah di kata terakhir --}}
+        @php
+            $nameParts = explode(' ', $siteSetting->site_name ?? 'PIAI WELLNESS');
+            $lastName = array_pop($nameParts);
+            $firstName = implode(' ', $nameParts);
+        @endphp
+        
+        {{ $firstName }} <span class="text-red-600">{{ $lastName }}</span>
+    </span>
+</a>
                 </div>
 
                 {{-- INDIKATOR PANEL --}}

@@ -52,15 +52,21 @@
 <aside id="logo-sidebar" class="fixed top-0 left-0 w-64 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 z-40 sm:z-20" aria-label="Sidebar">
    <div class="h-full px-4 pb-4 overflow-y-auto custom-scrollbar pt-2">
       
-      {{-- BRAND LOGO AREA (Hanya muncul di HP ketika drawer ditarik keluar) --}}
-      <div class="flex items-center justify-center mb-5 ps-2 sm:hidden border-b pb-4 mt-6">
-         <div class="flex items-center gap-2">
+      {{-- BRAND LOGO AREA (Dinamis dari Database) --}}
+<div class="flex items-center justify-center mb-5 ps-2 sm:hidden border-b border-gray-100 dark:border-gray-900 pb-4 mt-6">
+    <a href="{{ route($dashboardRoute) }}" class="flex items-center gap-2">
+        @if($siteSetting && $siteSetting->logo)
+            <img src="{{ asset('storage/' . $siteSetting->logo) }}" class="h-9 w-auto rounded-lg">
+        @else
             <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-md shadow-red-600/40">
-               P
+                {{ substr($siteSetting->site_name ?? 'P', 0, 1) }}
             </div>
-            <span class="self-center text-md font-black tracking-wider text-gray-900 dark:text-white">PIAI <span class="text-red-600 dark:text-red-500">WELLNESS</span></span>
-         </div>
-      </div>
+        @endif
+        <span class="text-sm font-black tracking-wider text-gray-900 dark:text-white uppercase">
+            {{ $siteSetting->site_name ?? 'PIAI WELLNESS' }}
+        </span>
+    </a>
+</div>
 
       <ul class="space-y-1.5 font-medium">
          
@@ -151,6 +157,14 @@
                </a>
             </li>
 
+            <li>
+               <a href="{{ route('admin.users.index') }}" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 group {{ request()->routeIs('admin.users.*') ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900' }}">
+                  <svg class="w-5 h-5 transition duration-200 {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-gray-400' }}" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                  <span class="ms-3.5">Manajemen Admin</span>
+               </a>
+            </li>
          {{-- MENU UNTUK MEMBER --}}
          @elseif(auth()->user()->role == 'member')
             <li class="flex items-center menu-title text-[11px] font-bold uppercase tracking-wider px-3 pt-1 pb-1">

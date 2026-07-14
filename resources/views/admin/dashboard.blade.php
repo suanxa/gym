@@ -43,6 +43,11 @@
 
         $chartLabels = array_column($chartFallback, 'label');
         $chartData = array_column($chartFallback, 'total');
+
+        $todayPresences = \App\Models\Presence::with(['user.member'])
+        ->whereDate('check_in', \Carbon\Carbon::today())
+        ->latest()
+        ->get();
     @endphp
 
     {{-- [FIXED MARGIN & DYNAMIC BG]: Menggunakan bg-gray-100 untuk light mode, dan dark:bg-gray-950 untuk dark mode --}}
@@ -137,28 +142,46 @@
                     </div>
                 </div>
 
-                {{-- BOX INFORMASI TA --}}
-                <div class="p-6 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white tracking-wide border-b border-gray-100 dark:border-gray-900 pb-3 mb-4">Pusat Informasi TA</h3>
-                        <ul class="space-y-3">
-                           <li class="flex items-start gap-3 text-xs text-gray-700 dark:text-gray-300">
-                               <span class="p-1 bg-red-100 dark:bg-red-600/20 text-red-600 dark:text-red-500 rounded font-black">1</span>
-                               <p>Every transaction set to <strong>Approved</strong> extends the digital member card's validity period instantly.</p>
-                           </li>
-                           <li class="flex items-start gap-3 text-xs text-gray-700 dark:text-gray-300">
-                               <span class="p-1 bg-red-100 dark:bg-red-600/20 text-red-600 dark:text-red-500 rounded font-black">2</span>
-                               <p>Incoming reviews from mobile start as drafts and must be approved in the backend moderation system.</p>
-                           </li>
-                           <li class="flex items-start gap-3 text-xs text-gray-700 dark:text-gray-300">
-                               <span class="p-1 bg-red-100 dark:bg-red-600/20 text-red-600 dark:text-red-500 rounded font-black">3</span>
-                               <p>Changes made to payment credentials dynamically update the target mobile payment interface.</p>
-                           </li>
-                        </ul>
+                {{-- BOX LIVE CHECK-IN --}}
+                <div class="p-6 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-900 pb-3 mb-4">
+                        <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span> Check-In Hari Ini
+                        </h3>
+                        <span class="text-[10px] font-bold text-gray-400">{{ $todayPresences->count() }} Orang</span>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-900 flex justify-between items-center">
-                        <span class="text-[11px] font-mono text-gray-400 dark:text-gray-500">PIAI WELLNESS v2.0</span>
-                        <div class="text-[11px] font-bold text-red-600 dark:text-red-500 animate-pulse">WATERFALL SYSTEM READY</div>
+
+                    {{-- Daftar Member --}}
+                    <div class="overflow-y-auto custom-scrollbar flex-1 space-y-3">
+                        @forelse($todayPresences as $presence)
+                            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm border border-indigo-200 dark:border-indigo-800 overflow-hidden shadow-sm">
+                                @if($presence->user->member && !empty($presence->user->member->profile_picture))
+                                    {{-- Mengambil dari relasi user -> member -> profile_picture --}}
+                                    <img src="{{ asset($presence->user->member->profile_picture) }}" 
+                                        alt="{{ $presence->user->name }}" 
+                                        class="w-full h-full object-cover">
+                                @else
+                                    {{-- Jika tidak ada foto, tampilkan Inisial dengan background gradient --}}
+                                    <div class="w-full h-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                        {{ substr($presence->user->name, 0, 1) }}
+                                    </div>
+                                @endif
+                            </div>  
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $presence->user->name }}</p>
+                                    <p class="text-[10px] text-gray-500 font-mono">
+                                        {{ \Carbon\Carbon::parse($presence->check_in)->format('H:i') }} WIB
+                                    </p>
+                                </div>
+                                <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                            </div>
+                        @empty
+                            <div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                                <svg class="w-10 h-10 mb-2 opacity-20" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/></svg>
+                                <p class="text-xs font-bold uppercase">Belum ada yang absen</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -229,5 +252,9 @@
                 myChart.update();
             }
         });
+
+        setInterval(function(){
+        window.location.reload();
+        }, 30000);
     </script>
 </x-app-layout>

@@ -38,6 +38,7 @@
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
                             <tr>
+                                <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4">Nama Item</th>
                                 <th class="px-6 py-4">Kategori</th>
                                 <th class="px-6 py-4">Jumlah (Rp)</th>
@@ -47,8 +48,9 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
-                            @forelse($expenses as $expense)
+                            @forelse($expenses as $index => $expense)
                             <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
+                                <td class="px-6 py-4 text-center">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ $expense->item_name }}</td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider 

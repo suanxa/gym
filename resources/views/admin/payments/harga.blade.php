@@ -47,6 +47,7 @@
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
                             <tr>
+                                <th class="px-6 py-4 w-12 text-center">No</th> 
                                 <th class="px-6 py-4">Kategori Paket</th>
                                 <th class="px-6 py-4">Harga Bulanan</th>
                                 <th class="px-6 py-4">Biaya Pendaftaran</th>
@@ -55,8 +56,9 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
-                            @foreach($prices as $price)
+                            @foreach($prices as $index => $price)
                             <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
+                                <td class="px-6 py-4 text-center text-xs font-black text-gray-400">{{ $index + 1 }}</td> 
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider {{ strtolower($price->category) == 'pelajar' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/60 dark:border-orange-500/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-500/20' }}">
                                         {{ $price->category }}

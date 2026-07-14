@@ -53,66 +53,71 @@
             <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm">
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
-                            <tr>
-                                <th class="px-6 py-4">Nama Member</th>
-                                <th class="px-6 py-4">Kategori Tipe</th>
-                                <th class="px-6 py-4">Status Akun</th>
-                                <th class="px-6 py-4">Masa Berlaku</th>
-                                <th class="px-6 py-4 text-center">Aksi Operasional</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
-                            @forelse($members as $member)
-                            <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
-                                <td class="px-6 py-4 font-bold text-gray-900 dark:text-white text-base">
-                                    {{ $member->user->name }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black tracking-wide uppercase {{ $member->type == 'pelajar' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' }}">
-                                        {{ $member->type }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="text-sm font-black tracking-wider uppercase {{ $member->status == 'active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                            {{ $member->status }}
-                                        </span>
-                                        
-                                        @if($member->payments->first() && $member->payments->first()->status == 'pending')
-                                            <span class="text-[9px] bg-yellow-500 text-black px-2 py-0.5 rounded-md font-black animate-pulse w-fit tracking-wide">
-                                                {{ $member->status == 'active' ? 'ANTREAN RE-NEWAL' : 'ANTREAN AKTIVASI' }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-xs font-mono font-bold text-gray-600 dark:text-gray-300">
-                                    @if($member->membership_expiry)
-                                        <span class="flex items-center gap-1.5">
-                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                                            {{ \Carbon\Carbon::parse($member->membership_expiry)->translatedFormat('d M Y') }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400 dark:text-gray-600 italic">Belum Diaktivasi</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <button 
-                                        @click="selectedMember = {{ $member->toJson() }}; showModal = true"
-                                        class="inline-flex items-center text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-xs font-black tracking-wide transition duration-150 shadow-md uppercase">
-                                        Periksa Berkas &rarr;
-                                    </button>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-12 text-center italic text-gray-400 dark:text-gray-600 font-bold">
-                                    Tidak ditemukan rekaman data anggota aktif dalam sistem.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+    <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
+        <tr>
+            <th class="px-6 py-4 w-12 text-center">No</th> <!-- Kolom Nomor -->
+            <th class="px-6 py-4">Nama Member</th>
+            <th class="px-6 py-4">Kategori</th>
+            <th class="px-6 py-4">Status Akun</th>
+            <th class="px-6 py-4">Masa Berlaku</th>
+            <th class="px-6 py-4 text-center">Aksi</th>
+        </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
+        @forelse($members as $index => $member) {{-- Menambahkan $index --}}
+        <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
+            {{-- Menampilkan Nomor Urut --}}
+            <td class="px-6 py-4 text-center text-xs font-black text-gray-400 dark:text-gray-600">
+                {{ $index + 1 }}
+            </td>
+            
+            <td class="px-6 py-4 font-bold text-gray-900 dark:text-white text-base">
+                {{ $member->user->name }}
+            </td>
+            <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black tracking-wide uppercase {{ $member->type == 'pelajar' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' }}">
+                    {{ $member->type }}
+                </span>
+            </td>
+            <td class="px-6 py-4">
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-black tracking-wider uppercase {{ $member->status == 'active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                        {{ $member->status }}
+                    </span>
+                    @if($member->payments->first() && $member->payments->first()->status == 'pending')
+                        <span class="text-[9px] bg-yellow-500 text-black px-2 py-0.5 rounded-md font-black animate-pulse w-fit tracking-wide">
+                            {{ $member->status == 'active' ? 'ANTREAN RE-NEWAL' : 'ANTREAN AKTIVASI' }}
+                        </span>
+                    @endif
+                </div>
+            </td>
+            <td class="px-6 py-4 text-xs font-mono font-bold text-gray-600 dark:text-gray-300">
+                @if($member->membership_expiry)
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                        {{ \Carbon\Carbon::parse($member->membership_expiry)->translatedFormat('d M Y') }}
+                    </span>
+                @else
+                    <span class="text-gray-400 dark:text-gray-600 italic">Belum Diaktivasi</span>
+                @endif
+            </td>
+            <td class="px-6 py-4 text-center">
+                <button 
+                    @click="selectedMember = {{ $member->toJson() }}; showModal = true"
+                    class="inline-flex items-center text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-xs font-black tracking-wide transition duration-150 shadow-md uppercase">
+                    Periksa Berkas &rarr;
+                </button>
+            </td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="6" class="px-6 py-12 text-center italic text-gray-400 dark:text-gray-600 font-bold">
+                Tidak ditemukan rekaman data anggota aktif dalam sistem.
+            </td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
                 </div>
             </div>
         </div>

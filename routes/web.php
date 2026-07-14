@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\Auth\GoogleController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 // Import Controller Admin
 use App\Http\Controllers\Admin\MemberController as AdminMember;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Admin\ExpenseController as AdminExpense;
 use App\Http\Controllers\Admin\ReviewController as AdminReview;
 use App\Http\Controllers\Admin\PriceController as AdminPrice; 
 use App\Http\Controllers\Admin\SettingController as AdminSetting;
+use App\Http\Controllers\Admin\AdminUserController as AdminUser;
 
 // Import Controller Member
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
@@ -27,7 +29,8 @@ use App\Http\Controllers\Member\PresenceController as MemberPresence;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return view('welcome');
+    $siteSetting = Setting::first(); // Mengambil data setting
+    return view('welcome', compact('siteSetting'));
 })->name('home');
 
 /*
@@ -85,6 +88,10 @@ Route::middleware(['auth', RoleMiddleware::class])->prefix('admin')->name('admin
     // --- MENU BARU: SETTING WEBSITE ---
     Route::get('/settings', [AdminSetting::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSetting::class, 'update'])->name('settings.update');
+
+    Route::get('/users', [AdminUser::class, 'index'])->name('users.index');
+    Route::post('/users', [AdminUser::class, 'store'])->name('users.store');
+    Route::delete('/users/{user}', [AdminUser::class, 'destroy'])->name('users.destroy');
 });
 
 /*

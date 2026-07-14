@@ -89,6 +89,7 @@
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
                             <tr>
+                                <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4">Waktu Transaksi</th>
                                 <th class="px-6 py-4">Nama Pelanggan</th>
                                 <th class="px-6 py-4 text-center">Tipe Anggota</th> 
@@ -99,42 +100,42 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
-                            @forelse($payments as $payment)
+                            @forelse($payments as $index => $payment)
                             <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
+                                <td class="px-6 py-4 text-center text-xs font-black text-gray-400">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4 text-xs font-mono font-bold text-gray-400 dark:text-gray-500">
                                     {{ $payment->created_at->format('d/m/Y H:i') }} WIB
                                 </td>
                                 <td class="px-6 py-4 font-bold text-gray-900 dark:text-white text-base">
                                     {{ $payment->user->name ?? $payment->external_customer_name }}
                                 </td>
-                                
                                 {{-- GANTI DUA KOLOM INI DI DALAM FORELSE TABEL KAMU --}}
                                 {{-- 1. KOLOM TIPE ANGGOTA --}}
                                <td class="px-6 py-4 text-center">
-    @if($payment->user_id)
-        @php
-            // Ambil tipe member (pelajar / umum) secara lowercase untuk validasi string
-            $memberType = strtolower($payment->user->member?->type ?? 'umum');
-        @endphp
+                                    @if($payment->user_id)
+                                        @php
+                                            // Ambil tipe member (pelajar / umum) secara lowercase untuk validasi string
+                                            $memberType = strtolower($payment->user->member?->type ?? 'umum');
+                                        @endphp
 
-        @if($memberType === 'pelajar')
-            {{-- Badge Oranye Menyala untuk Kategori Pelajar/Mahasiswa --}}
-            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/60 dark:border-orange-500/20">
-                Member Pelajar
-            </span>
-        @else
-            {{-- Badge Biru Eksklusif untuk Kategori Umum --}}
-            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-500/20">
-                Member Umum
-            </span>
-        @endif
-    @else
-        {{-- Badge Abu-abu Netral untuk Pengunjung Luar / Non-Member --}}
-        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-gray-50 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800">
-            GUEST VISIT
-        </span>
-    @endif
-</td>
+                                        @if($memberType === 'pelajar')
+                                            {{-- Badge Oranye Menyala untuk Kategori Pelajar/Mahasiswa --}}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/60 dark:border-orange-500/20">
+                                                Member Pelajar
+                                            </span>
+                                        @else
+                                            {{-- Badge Biru Eksklusif untuk Kategori Umum --}}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-500/20">
+                                                Member Umum
+                                            </span>
+                                        @endif
+                                    @else
+                                        {{-- Badge Abu-abu Netral untuk Pengunjung Luar / Non-Member --}}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-gray-50 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800">
+                                            GUEST VISIT
+                                        </span>
+                                    @endif
+                                </td>
 
                                 {{-- 2. KOLOM KATEGORI DESKRIPSI--}}
                                 <td class="px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-300">
@@ -209,7 +210,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center italic text-gray-400 dark:text-gray-600 font-bold">
+                                <td colspan="8" class="px-6 py-12 text-center italic text-gray-400 dark:text-gray-600 font-bold">
                                     Belum terdeteksi adanya rekaman catatan transaksi keuangan masuk.
                                 </td>
                             </tr>
