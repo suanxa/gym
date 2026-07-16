@@ -7,14 +7,14 @@
             <h2 class="text-5xl lg:text-6xl font-black uppercase tracking-tighter text-gray-900 mb-6">
                 SEMUA YANG KAMU BUTUHKAN <br> <span class="text-red-600">ADA DI SINI</span>
             </h2>
-            <p class="text-gray-600 max-w-xl mx-auto">Fasilitas lengkap, trainer profesional, dan komunitas yang mendukungmu — semua dalam satu atap.</p>
+            <p class="text-gray-600 max-w-xl mx-auto">Fasilitas lengkap, Tempat nyaman, dan komunitas yang mendukungmu — semua dalam satu atap.</p>
         </div>
 
         {{-- Grid Fitur --}}
         <div class="grid md:grid-cols-3 gap-6 mb-24">
             @foreach([
                 ['Peralatan Premium', 'Lebih dari 200+ peralatan gym terkini dari brand kelas dunia.'],
-                ['Pelatih Bersertifikat', 'Tim trainer profesional bersertifikat Internasional siap membimbingmu.'],
+                ['Tempat Bersih dan Nyaman', 'Kebersihan peralatan dan ruang latihan yang nyaman.'],
                 ['Program Personal', 'Program latihan yang dirancang khusus sesuai kondisi tubuh & target.'],
                 ['Nutrisi & Diet', 'Konsultasi gizi dan rencana diet personal yang selaras dengan program.'],
                 ['Kompetisi Internal', 'Event dan kompetisi rutin bulanan untuk memacu semangatmu.'],
@@ -34,42 +34,61 @@
                 PILIH PAKET <span class="text-red-600">MEMBERSHIP</span> <br> YANG COCOK UNTUKMU
             </h2>
         </div>
+        
+        {{-- Kartu Paket (Dinamis - Simetris) --}}
+        <div class="flex flex-wrap justify-center gap-8 items-center max-w-6xl mx-auto">
+            @foreach($membershipPackages as $index => $package)
+                @php
+                    $isPopular = ($index === 1); 
+                @endphp
 
-        {{-- Kartu Paket --}}
-        <div class="grid lg:grid-cols-3 gap-8 items-center max-w-6xl mx-auto">
-            {{-- Starter --}}
-            <div class="p-8 bg-[#f5e6d3] rounded-3xl border border-gray-200">
-                <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Paket</div>
-                <h3 class="text-3xl font-black mb-4">Starter</h3>
-                <div class="text-4xl font-black mb-6">Rp 299k <span class="text-sm font-bold text-gray-500">/bulan</span></div>
-                <ul class="space-y-4 mb-8 text-sm font-bold">
-                    <li>✓ Akses gym 24/7</li><li>✓ Program latihan dasar</li><li>✓ Loker & shower</li>
-                </ul>
-                <button class="w-full py-4 bg-gray-900 text-white font-black rounded-lg hover:bg-red-600">PILIH PAKET</button>
-            </div>
+                {{-- Class warna teks: jika populer tetap putih, jika tidak jadi gray-900 (hitam) --}}
+                <div class="w-full md:w-[350px] {{ $isPopular ? 'relative p-10 bg-red-600 text-white rounded-3xl shadow-2xl scale-105 z-10' : 'p-8 bg-[#f5e6d3] rounded-3xl border border-gray-200' }}">
+                    
+                    @if($isPopular)
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-black text-white text-[10px] font-black uppercase rounded-full">Terpopuler</div>
+                    @endif
 
-            {{-- Pro (Terpopuler) --}}
-            <div class="relative p-10 bg-red-600 text-white rounded-3xl shadow-2xl scale-105 z-10">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-black text-white text-[10px] font-black uppercase rounded-full">Terpopuler</div>
-                <div class="text-[10px] font-black uppercase tracking-widest text-red-200 mb-2">Paket</div>
-                <h3 class="text-3xl font-black mb-4">Pro</h3>
-                <div class="text-4xl font-black mb-6">Rp 599k <span class="text-sm font-bold text-red-200">/bulan</span></div>
-                <ul class="space-y-4 mb-8 text-sm font-bold">
-                    <li>✓ Semua fitur starter</li><li>✓ Personal Trainer</li><li>✓ Semua kelas grup</li><li>✓ Konsultasi nutrisi</li>
-                </ul>
-                <button class="w-full py-4 bg-white text-red-600 font-black rounded-lg">PILIH PAKET PRO</button>
-            </div>
-
-            {{-- Elite --}}
-            <div class="p-8 bg-[#f5e6d3] rounded-3xl border border-gray-200">
-                <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Paket</div>
-                <h3 class="text-3xl font-black mb-4">Elite</h3>
-                <div class="text-4xl font-black mb-6">Rp 999k <span class="text-sm font-bold text-gray-500">/bulan</span></div>
-                <ul class="space-y-4 mb-8 text-sm font-bold">
-                    <li>✓ Semua fitur pro</li><li>✓ Private trainer</li><li>✓ Guest pass 4x/bulan</li>
-                </ul>
-                <button class="w-full py-4 bg-gray-900 text-white font-black rounded-lg hover:bg-red-600">PILIH PAKET ELITE</button>
-            </div>
+                    {{-- Label Paket --}}
+                    <div class="text-[10px] font-black uppercase tracking-widest {{ $isPopular ? 'text-red-200' : 'text-gray-500' }} mb-2">Paket</div>
+                    
+                    {{-- Judul (Hitam jika tidak terpopuler) --}}
+                    <h3 class="text-3xl font-black mb-4 {{ !$isPopular ? 'text-gray-900' : 'text-white' }}">
+                        {{ $package->category }}
+                    </h3>
+                    
+                    {{-- Harga (Hitam jika tidak terpopuler) --}}
+                    <div class="text-4xl font-black mb-6 {{ !$isPopular ? 'text-gray-900' : 'text-white' }}">
+                        Rp {{ number_format($package->price, 0, ',', '.') }} 
+                        <span class="text-sm font-bold {{ $isPopular ? 'text-red-200' : 'text-gray-500' }}">/bulan</span>
+                    </div>
+                    
+                    {{-- Benefit (Hitam jika tidak terpopuler) --}}
+                    <div class="text-sm font-bold mb-8 {{ !$isPopular ? 'text-gray-800' : 'text-white' }}">
+                        <div class="text-xs {{ !$isPopular ? 'text-gray-500' : 'opacity-80' }} mb-2">Benefit:</div>
+                        <ul class="space-y-2">
+                            @foreach(explode("\n", $package->description) as $desc)
+                                <li>✓ {{ trim($desc) }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    
+                    <button class="w-full py-4 {{ $isPopular ? 'bg-white text-red-600' : 'bg-gray-900 text-white hover:bg-red-600' }} font-black rounded-lg">
+                        PILIH PAKET {{ strtoupper($package->category) }}
+                    </button>
+                </div>
+            @endforeach
         </div>
+
+        {{-- Harga Harian/Guest (TARUH DI LUAR FOREACH AGAR TIDAK DUPLIKAT) --}}
+        @if($dailyPrice)
+            <div class="mt-16 text-center">
+                <p class="text-gray-600 font-bold">
+                    Hanya ingin latihan sekali? Kami punya 
+                    <span class="text-red-600 font-black underline">{{ $dailyPrice->category }}</span> 
+                    seharga <span class="font-black">Rp {{ number_format($dailyPrice->price, 0, ',', '.') }}</span>
+                </p>
+            </div>
+        @endif
     </div>
 </section>

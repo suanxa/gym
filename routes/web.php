@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\WelcomeController;
 
 // Import Controller Admin
 use App\Http\Controllers\Admin\MemberController as AdminMember;
@@ -28,10 +29,7 @@ use App\Http\Controllers\Member\PresenceController as MemberPresence;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    $siteSetting = Setting::first(); // Mengambil data setting
-    return view('welcome', compact('siteSetting'));
-})->name('home');
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 /*
 |--------------------------------------------------------------------------
