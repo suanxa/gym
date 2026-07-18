@@ -97,7 +97,7 @@
                             <span class="inline-flex items-center px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded-full animate-pulse">BARU</span>
                         @endif
                     </p>
-                    <a href="{{ route('admin.payments.index') }}" class="text-[11px] text-red-600 dark:text-red-500 hover:underline font-bold block mt-3 uppercase tracking-wider">Periksa Bukti &rarr;</a>
+                    <a href="{{ route('admin.members.index') }}" class="text-[11px] text-red-600 dark:text-red-500 hover:underline font-bold block mt-3 uppercase tracking-wider">Periksa Bukti &rarr;</a>
                 </div>
 
                 {{-- CARD 3 --}}

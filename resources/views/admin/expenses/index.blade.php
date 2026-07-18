@@ -1,81 +1,104 @@
 <x-app-layout>
-    {{-- FORCE GLOBAL STYLE UNTUK SINKRONISASI TEMA TERANG/GELAP --}}
     <style>
-        .dark body, .dark main, .dark .min-h-screen { 
-            background-color: #030712 !important; 
-        }
-        body, main, .min-h-screen { 
-            background-color: #f3f4f6 !important; 
-            transition: background-color 0.2s ease;
-        }
+        .dark body, .dark main { background-color: #030712 !important; }
+        body, main { background-color: #f3f4f6 !important; }
     </style>
 
-    <div class="p-4 sm:ml-1 bg-gray-100 dark:bg-gray-950 min-h-screen pt-2 text-gray-800 dark:text-gray-100 transition-colors duration-200" x-data="{ openModal: false }">
+    {{-- WRAPPER DENGAN ALPINE X-DATA --}}
+    <div class="p-4 sm:ml-1 min-h-screen pt-2" 
+         x-data="{ 
+            expenses: {{ $expenses->toJson() }}, 
+            search: '', 
+            categoryFilter: '', 
+            page: 1, 
+            perPage: 10,
+            showModal: false, // Digunakan untuk modal tambah
+            openModal: false, 
+            
+            get filtered() {
+                return this.expenses.filter(e => {
+                    return (e.item_name.toLowerCase().includes(this.search.toLowerCase())) &&
+                           (this.categoryFilter === '' || e.category === this.categoryFilter);
+                });
+            },
+            get totalAmount() {
+                return this.filtered.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+            },
+            get paginated() {
+                return this.filtered.slice((this.page - 1) * this.perPage, this.page * this.perPage);
+            },
+            get totalPages() { return Math.ceil(this.filtered.length / this.perPage) || 1; }
+         }">
+        
         <div class="max-w-7xl mx-auto space-y-6">
             
             {{-- HEADER MODUL --}}
-            <div class="p-6 bg-gradient-to-r from-white via-slate-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/40 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="p-6 bg-gradient-to-r from-white via-slate-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/40 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
-                    <h1 class="text-2xl font-black tracking-wide text-gray-900 dark:text-white uppercase">
-                        Catatan <span class="text-indigo-600 dark:text-indigo-400">Pengeluaran</span>
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Monitoring operasional dan biaya pemeliharaan fasilitas Piai Futsal Fitness.</p>
+                    <h1 class="text-2xl font-black text-gray-900 dark:text-white uppercase">Catatan <span class="text-indigo-600 dark:text-indigo-400">Pengeluaran</span></h1>
+                    <p class="text-sm text-gray-500 mt-1">Monitoring operasional dan biaya fasilitas.</p>
                 </div>
-                <button @click="openModal = true" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-5 rounded-xl transition shadow-md shadow-indigo-600/20 text-xs uppercase tracking-wide">
-                    + Tambah Item Pengeluaran
+                {{-- BOX TOTAL HARGA (DINAMIS) --}}
+                <div class="bg-white/80 dark:bg-gray-900 px-6 py-3 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 text-right">
+                    <p class="text-[10px] uppercase font-black text-gray-400">Total Pengeluaran (Filtered)</p>
+                    <p class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono" 
+                       x-text="'Rp ' + totalAmount.toLocaleString('id-ID')"></p>
+                </div>
+                <button @click="openModal = true" class="bg-indigo-600 text-white font-black py-3 px-5 rounded-xl text-xs uppercase shadow-md shadow-indigo-600/20">
+                    + Tambah Item
                 </button>
             </div>
 
-            @if(session('success'))
-                <div class="p-4 text-sm text-green-800 dark:text-green-400 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 font-bold shadow-sm">
-                    {{ session('success') }}
-                </div>
-            @endif
+            {{-- FILTER BAR --}}
+            <div class="flex flex-wrap gap-3 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 items-center">
+                <input type="text" x-model="search" placeholder="Cari item..." class="text-xs px-4 py-2.5 bg-gray-50 dark:bg-gray-950 border rounded-xl w-48">
+                <select x-model="categoryFilter" class="text-xs px-4 py-2.5 bg-gray-50 dark:bg-gray-950 border rounded-xl">
+                    <option value="">Semua Kategori</option>
+                    <option value="equipment">Equipment</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="utility">Utility</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
 
             {{-- TABEL DATA --}}
-            <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm">
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
+            <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-950/60 border-b">
                             <tr>
-                                <th class="px-6 py-4 w-12 text-center">No</th>
+                                <th class="px-6 py-4">No</th>
                                 <th class="px-6 py-4">Nama Item</th>
                                 <th class="px-6 py-4">Kategori</th>
                                 <th class="px-6 py-4">Jumlah (Rp)</th>
                                 <th class="px-6 py-4">Tanggal</th>
-                                <th class="px-6 py-4">Catatan</th>
                                 <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
-                            @forelse($expenses as $index => $expense)
-                            <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
-                                <td class="px-6 py-4 text-center">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ $expense->item_name }}</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider 
-                                        {{ $expense->category == 'equipment' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/60' : '' }}
-                                        {{ $expense->category == 'maintenance' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/60' : '' }}
-                                        {{ $expense->category == 'utility' ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200/60' : '' }}
-                                        {{ $expense->category == 'other' ? 'bg-gray-50 dark:bg-gray-700/40 text-gray-600 dark:text-gray-300 border border-gray-200' : '' }}">
-                                        {{ strtoupper($expense->category) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 font-black font-mono text-gray-900 dark:text-white">Rp {{ number_format($expense->amount, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4 text-xs font-mono text-gray-600 dark:text-gray-300">{{ \Carbon\Carbon::parse($expense->expense_date)->translatedFormat('d M Y') }}</td>
-                                <td class="px-6 py-4 text-xs text-gray-400 dark:text-gray-500 italic">{{ $expense->note ?? '-' }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <form action="{{ route('admin.expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus catatan ini?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 font-bold text-xs uppercase tracking-tighter">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr><td colspan="6" class="px-6 py-12 text-center italic text-gray-400">Belum ada data pengeluaran.</td></tr>
-                            @endforelse
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60">
+                            <template x-for="(expense, index) in paginated" :key="expense.id">
+                                <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40">
+                                    <td class="px-6 py-4 text-center text-xs font-black text-gray-400" x-text="(page-1)*perPage + index + 1"></td>
+                                    <td class="px-6 py-4 font-bold text-gray-900 dark:text-white" x-text="expense.item_name"></td>
+                                    <td class="px-6 py-4" x-text="expense.category.toUpperCase()"></td>
+                                    <td class="px-6 py-4 font-black font-mono text-gray-900 dark:text-white" x-text="'Rp ' + parseFloat(expense.amount).toLocaleString('id-ID')"></td>
+                                    <td class="px-6 py-4 text-xs font-mono" x-text="new Date(expense.expense_date).toLocaleDateString()"></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <form :action="'/admin/expenses/' + expense.id" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-red-600 font-bold text-xs uppercase">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
+                </div>
+                {{-- PAGINATION CONTROLS --}}
+                <div class="px-6 py-4 border-t flex justify-between items-center bg-gray-50 dark:bg-gray-950">
+                    <button @click="page--" :disabled="page == 1" class="text-xs font-bold px-4 py-2 bg-gray-200 rounded-lg">Sebelumnya</button>
+                    <span class="text-xs font-bold" x-text="'Hal ' + page + ' dari ' + totalPages"></span>
+                    <button @click="page++" :disabled="page >= totalPages" class="text-xs font-bold px-4 py-2 bg-gray-200 rounded-lg">Selanjutnya</button>
                 </div>
             </div>
         </div>

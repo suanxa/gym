@@ -69,6 +69,7 @@ Route::middleware(['auth', RoleMiddleware::class])->prefix('admin')->name('admin
     Route::post('/members/approve/{id}', [AdminMember::class, 'approve'])->name('admin.members.approve');
     Route::post('/payments/manual', [AdminPayment::class, 'store_manual'])->name('payments.store_manual');
     Route::post('/members/reject/{id}', [AdminMember::class, 'reject'])->name('admin.members.reject');
+    Route::get('/payments/export', [AdminPayment::class, 'export'])->name('payments.export');
 
     // --- MENU BARU: KELOLA HARGA ---
     Route::get('/prices', [AdminPrice::class, 'index'])->name('payments.harga');

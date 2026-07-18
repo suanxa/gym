@@ -276,6 +276,22 @@ class AuthController extends Controller
         return response()->json(['status' => 'success', 'data' => $stats]);
     }
 
+    public function checkPresenceStatus(Request $request)
+{
+    $user = $request->user();
+    $today = date('Y-m-d');
+
+    // Cek apakah ada record presensi hari ini
+    $already = Presence::where('user_id', $user->id)
+                       ->whereDate('check_in', $today)
+                       ->exists();
+
+    return response()->json([
+        'status' => 'success',
+        'sudah_absen' => $already // Mengembalikan true jika sudah absen, false jika belum
+    ]);
+}
+
     public function storeReview(Request $request)
 {
     $request->validate([

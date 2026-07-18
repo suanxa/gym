@@ -79,6 +79,53 @@
                 </form>
             </div>
 
+            {{-- FILTER & EXPORT BAR --}}
+<div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-5">
+    <form action="{{ route('admin.payments.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div>
+            <label class="block mb-2 text-xs font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider">Nama Pelanggan</label>
+            <input type="text" name="search" value="{{ request('search') }}"
+                   class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm rounded-xl block w-full p-3 focus:ring-2 focus:ring-red-500 focus:outline-none font-semibold"
+                   placeholder="Cari nama...">
+        </div>
+        <div>
+            <label class="block mb-2 text-xs font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider">Dari Tanggal</label>
+            <input type="date" name="start_date" value="{{ request('start_date') }}"
+                   class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm rounded-xl block w-full p-3 focus:ring-2 focus:ring-red-500 focus:outline-none font-semibold">
+        </div>
+        <div>
+            <label class="block mb-2 text-xs font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider">Sampai Tanggal</label>
+            <input type="date" name="end_date" value="{{ request('end_date') }}"
+                   class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm rounded-xl block w-full p-3 focus:ring-2 focus:ring-red-500 focus:outline-none font-semibold">
+        </div>
+        <div>
+            <label class="block mb-2 text-xs font-black uppercase text-gray-500 dark:text-gray-400 tracking-wider">Status</label>
+            <select name="status" class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm rounded-xl block w-full p-3 focus:ring-2 focus:ring-red-500 focus:outline-none font-semibold">
+                <option value="">Semua Status</option>
+                <option value="pending" @selected(request('status') === 'pending')>Pending</option>
+                <option value="approved" @selected(request('status') === 'approved')>Disetujui</option>
+                <option value="rejected" @selected(request('status') === 'rejected')>Ditolak</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wide">
+                Filter
+            </button>
+            <a href="{{ route('admin.payments.index') }}" class="w-full text-center bg-gray-100 dark:bg-gray-950 text-gray-500 dark:text-gray-400 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wide hover:bg-gray-200 dark:hover:bg-gray-900">
+                Reset
+            </a>
+        </div>
+    </form>
+
+    <div class="mt-4 flex justify-end">
+        <a href="{{ route('admin.payments.export', request()->query()) }}"
+           class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-black py-2.5 px-5 rounded-xl text-xs uppercase tracking-wide shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Export Excel
+        </a>
+    </div>
+</div>
+
             {{-- MAIN DATATABLE KAS MASUK --}}
             <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm">
                 <div class="p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/20">
@@ -217,6 +264,10 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+                 {{-- PAGINATION --}}
+                <div class="p-5 border-t border-gray-100 dark:border-gray-800">
+                    {{ $payments->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>

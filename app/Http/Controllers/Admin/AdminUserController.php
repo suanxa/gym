@@ -29,6 +29,7 @@ class AdminUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'admin', // Memastikan role selalu admin
+            'email_verified_at' => now(),
         ]);
 
         return back()->with('success', 'Admin baru berhasil ditambahkan!');

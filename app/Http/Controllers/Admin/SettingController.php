@@ -18,10 +18,11 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
+        // dd($request->all(), $request->files->all());
         $request->validate([
             'site_name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email',
             'address' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -62,6 +63,7 @@ class SettingController extends Controller
         // Simpan data (update jika ada, create jika tidak ada baris ID 1)
         Setting::updateOrCreate(['id' => 1], $data);
 
+        // dd($result->wasRecentlyCreated, $result->fresh());
         return redirect()->back()->with('success', 'Pengaturan website berhasil diperbarui!');
     }
 }

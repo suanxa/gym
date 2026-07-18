@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payment-method', [AuthController::class, 'getPaymentMethod']);
     Route::post('/checkin', [AuthController::class, 'checkIn']);
     Route::get('/presence-stats', [AuthController::class, 'getPresenceStats']);
+    Route::get('/user/cek-presensi', [AuthController::class, 'checkPresenceStatus']);
     Route::get('/user/profile', [AuthController::class, 'profile']);
     Route::post('/user/review', [AuthController::class, 'storeReview']);
     Route::post('/user/update-profile', [AuthController::class, 'updateProfile']);

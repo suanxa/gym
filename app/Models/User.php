@@ -19,6 +19,7 @@ class User extends Authenticatable implements MustVerifyEmail // TAMBAHKAN IMPLE
         'email',
         'password',
         'role',
+        'email_verified_at',
         'google_id'
     ];
 
