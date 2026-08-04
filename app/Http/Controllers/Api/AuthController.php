@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use App\Models\Presence;
 use App\Models\Review;
 use App\Models\Setting;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -408,6 +412,61 @@ public function updateProfile(Request $request)
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['status' => 'success', 'message' => 'Berhasil keluar.']);
+        return response()->json(['status' => 'success', 'message' => 'Token berhasil dicabut dan sesi berakhir.']);
     }
+
+    // Reset Password Member
+    // Step 1: Kirim link/OTP ke Email
+    public function forgotPassword(Request $request)
+{
+    $request->validate(['email' => 'required|email|exists:users,email']);
+
+    // 1. Generate 6 digit OTP
+    $otp = rand(100000, 999999);
+
+    // 2. Simpan ke database (menggunakan tabel bawaan Laravel)
+    // token kita isi dengan OTP agar mudah diverifikasi nanti
+    DB::table('password_reset_tokens')->updateOrInsert(
+        ['email' => $request->email],
+        [
+            'token' => Hash::make($otp), // Kita hash agar aman
+            'created_at' => Carbon::now()
+        ]
+    );
+
+    // 3. Kirim Email Manual (Ganti 'emails.otp' dengan view email Anda)
+    // Untuk testing cepat, bisa gunakan Mail::raw()
+    Mail::raw("Kode verifikasi reset password Anda adalah: $otp", function ($message) use ($request) {
+        $message->to($request->email)->subject('Kode Verifikasi OTP');
+    });
+
+    return response()->json(['status' => 'success', 'message' => 'OTP telah dikirim ke email Anda.']);
+}
+
+    // Step 2: Reset Password Baru
+    public function resetPassword(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'token' => 'required', // Ini adalah OTP 6 digit dari Flutter
+        'password' => 'required|min:8|confirmed',
+    ]);
+
+    // 1. Cek apakah OTP ada di DB
+    $passwordReset = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+    if (!$passwordReset || !Hash::check($request->token, $passwordReset->token)) {
+        return response()->json(['status' => 'error', 'message' => 'OTP tidak valid atau kadaluarsa.'], 400);
+    }
+
+    // 2. Jika valid, update password
+    $user = User::where('email', $request->email)->first();
+    $user->password = Hash::make($request->password);
+    $user->save();
+
+    // 3. Hapus token setelah berhasil
+    DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+    return response()->json(['status' => 'success', 'message' => 'Password berhasil diubah.']);
+}
 }

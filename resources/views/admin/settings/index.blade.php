@@ -51,7 +51,7 @@
                                 <input type="email" name="email" value="{{ old('email', $setting->email) }}" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 dark:text-white focus:ring-2 focus:ring-indigo-500">
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase">Alamat Lengkap</label>
+                                <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase">Deskripsi</label>
                                 <textarea name="address" rows="2" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 dark:text-white focus:ring-2 focus:ring-indigo-500">{{ old('address', $setting->address) }}</textarea>
                             </div>
                         </div>

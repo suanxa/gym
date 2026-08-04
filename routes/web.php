@@ -73,7 +73,9 @@ Route::middleware(['auth', RoleMiddleware::class])->prefix('admin')->name('admin
 
     // --- MENU BARU: KELOLA HARGA ---
     Route::get('/prices', [AdminPrice::class, 'index'])->name('payments.harga');
+    Route::post('/prices', [AdminPrice::class, 'store'])->name('prices.store');
     Route::put('/prices/{id}', [AdminPrice::class, 'update'])->name('prices.update');
+    Route::delete('/prices/{price}', [AdminPrice::class, 'destroy'])->name('prices.destroy');
 
     // Catatan Pengeluaran Fasilitas (Tabel 3.7 Laporan)
     Route::get('/expenses', [AdminExpense::class, 'index'])->name('expenses.index');

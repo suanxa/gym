@@ -20,8 +20,7 @@ class MemberController extends Controller
 
     public function index()
     {
-        // Mengambil member yang memiliki pembayaran 'pending' diprioritaskan ke atas
-        // Kita cek melalui relasi payments yang statusnya pending
+        // Member yang sudah ada di sistem (aktivasi/data lengkap)
         $members = Member::with(['user', 'payments' => function($query) {
                 $query->latest();
             }])
@@ -30,12 +29,17 @@ class MemberController extends Controller
                 ->latest()
                 ->take(1)
             ])
-            // Urutkan: Yang punya status pending di pembayaran terakhir muncul paling atas
             ->orderByRaw("CASE WHEN latest_payment_status = 'pending' THEN 0 ELSE 1 END")
             ->latest()
             ->get();
 
-        return view('admin.members.index', compact('members'));
+        // User yang belum menjadi member (User tanpa relasi member)
+        // Asumsi: di tabel users ada relasi hasOne member
+        $unregisteredUsers = \App\Models\User::whereDoesntHave('member')
+            ->where('role', '!=', 'admin') // Pastikan admin tidak muncul
+            ->get();
+
+        return view('admin.members.index', compact('members', 'unregisteredUsers'));
     }
 
 public function approve($id)

@@ -37,7 +37,7 @@
 
         {{-- Kolom 3: Lokasi --}}
         <div>
-            <h4 class="font-black uppercase tracking-widest text-xs mb-8 text-white border-l-2 border-red-600 pl-4">Lokasi</h4>
+            <h4 class="font-black uppercase tracking-widest text-xs mb-8 text-white border-l-2 border-red-600 pl-4">Lokasi dan Jam Operasional</h4>
             <p class="text-gray-400 text-sm leading-relaxed">
                 {{ $siteSetting->address ?? 'Lokasi gym belum diatur.' }}
             </p>

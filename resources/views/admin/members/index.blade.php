@@ -15,24 +15,26 @@
     </style>
 
     <div class="p-4 sm:ml-1 bg-gray-100 dark:bg-gray-950 min-h-screen pt-2 text-gray-800 dark:text-gray-100 transition-colors duration-200" 
-            x-data="{ 
-                members: {{ $members->toJson() }}, 
-                search: '', 
-                page: 1, 
-                perPage: 10,
-                selectedMember: null, 
-                showModal: false,
-                get filteredMembers() {
-                    return this.members.filter(m => m.user.name.toLowerCase().includes(this.search.toLowerCase()));
-                },
-                get paginatedMembers() {
-                    let start = (this.page - 1) * this.perPage;
-                    return this.filteredMembers.slice(start, start + this.perPage);
-                },
-                get totalPages() {
-                    return Math.ceil(this.filteredMembers.length / this.perPage);
-                }
-            }">
+        x-data="{ 
+            members: {{ $members->toJson() }}, 
+            registeredUsers: {{ $unregisteredUsers->toJson() }}, {{-- Tambahkan ini --}}
+            tab: 'members', {{-- Tambahkan ini --}}
+            search: '', 
+            page: 1, 
+            perPage: 10,
+            selectedMember: null, 
+            showModal: false,
+            get filteredMembers() {
+                return this.members.filter(m => m.user.name.toLowerCase().includes(this.search.toLowerCase()));
+            },
+            get paginatedMembers() {
+                let start = (this.page - 1) * this.perPage;
+                return this.filteredMembers.slice(start, start + this.perPage);
+            },
+            get totalPages() {
+                return Math.ceil(this.filteredMembers.length / this.perPage);
+            }
+        }">
          
         <div class="max-w-7xl mx-auto space-y-6">
             
@@ -67,99 +69,138 @@
                     class="w-full sm:w-64 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition">
             </div>
 
-            {{-- MAIN DATATABLE CONTAINER --}}
-            <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm">
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
-                            <tr>
-                                <th class="px-6 py-4 w-12 text-center">No</th> <!-- Kolom Nomor -->
-                                <th class="px-6 py-4">Nama Member</th>
-                                <th class="px-6 py-4">Kategori</th>
-                                <th class="px-6 py-4">Status Akun</th>
-                                <th class="px-6 py-4">Masa Berlaku</th>
-                                <th class="px-6 py-4 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
-    {{-- Menggunakan template Alpine untuk melakukan looping pada data yang sudah difilter dan dipaginate --}}
-    <template x-for="(member, index) in paginatedMembers" :key="member.id">
-        <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
-            {{-- Nomor Urut Dinamis --}}
-            <td class="px-6 py-4 text-center text-xs font-black text-gray-400 dark:text-gray-600" 
-                x-text="(page - 1) * perPage + index + 1">
-            </td>
-            
-            {{-- Nama Member --}}
-            <td class="px-6 py-4 font-bold text-gray-900 dark:text-white text-base" 
-                x-text="member.user.name">
-            </td>
-
-            {{-- Kategori --}}
-            <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black tracking-wide uppercase"
-                      :class="member.type == 'pelajar' 
-                        ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' 
-                        : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20'">
-                    <span x-text="member.type"></span>
-                </span>
-            </td>
-
-            {{-- Status --}}
-            <td class="px-6 py-4">
-                <div class="flex flex-col gap-1">
-                    <span class="text-sm font-black tracking-wider uppercase" 
-                          :class="member.status == 'active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                          x-text="member.status">
-                    </span>
-                    {{-- Cek apakah ada pembayaran pending --}}
-                    <template x-if="member.payments && member.payments.length > 0 && member.payments[0].status == 'pending'">
-                        <span class="text-[9px] bg-yellow-500 text-black px-2 py-0.5 rounded-md font-black animate-pulse w-fit tracking-wide">
-                            <span x-text="member.status == 'active' ? 'ANTREAN RE-NEWAL' : 'ANTREAN AKTIVASI'"></span>
-                        </span>
-                    </template>
-                </div>
-            </td>
-
-            {{-- Masa Berlaku --}}
-            <td class="px-6 py-4 text-xs font-mono font-bold text-gray-600 dark:text-gray-300">
-                <template x-if="member.membership_expiry">
-                    <span class="flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                        <span x-text="member.membership_expiry"></span>
-                    </span>
-                </template>
-                <template x-if="!member.membership_expiry">
-                    <span class="text-gray-400 dark:text-gray-600 italic">Belum Diaktivasi</span>
-                </template>
-            </td>
-
-            {{-- Aksi --}}
-            <td class="px-6 py-4 text-center">
-                <button @click="selectedMember = member; showModal = true" 
-                        class="inline-flex items-center text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-xs font-black tracking-wide transition duration-150 shadow-md uppercase">
-                    Periksa Berkas &rarr;
+            {{-- KONTROL TAB --}}
+            <div class="flex gap-2 mb-6">
+                <button @click="tab = 'members'" 
+                        :class="tab == 'members' ? 'bg-red-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500'"
+                        class="px-5 py-2 rounded-xl font-black text-xs uppercase shadow-sm transition">
+                    Data Member (<span x-text="members.length"></span>)
                 </button>
-            </td>
-        </tr>
-    </template>
+                <button @click="tab = 'registered'" 
+                        :class="tab == 'registered' ? 'bg-red-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500'"
+                        class="px-5 py-2 rounded-xl font-black text-xs uppercase shadow-sm transition">
+                    User Baru/Belum Member (<span x-text="registeredUsers.length"></span>)
+                </button>
+            </div>
 
-    {{-- Kondisi jika hasil pencarian kosong --}}
-    <template x-if="filteredMembers.length === 0">
-        <tr>
-            <td colspan="6" class="px-6 py-12 text-center italic text-gray-400 dark:text-gray-600 font-bold">
-                Tidak ditemukan rekaman data anggota yang sesuai.
-            </td>
-        </tr>
-    </template>
-</tbody>
-                    </table>
+            {{-- MAIN DATATABLE CONTAINER --}}
+            <div x-show="tab == 'members'">
+                <div class="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-950/60 border-b border-gray-200 dark:border-gray-800 tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-4 w-12 text-center">No</th> <!-- Kolom Nomor -->
+                                    <th class="px-6 py-4">Nama Member</th>
+                                    <th class="px-6 py-4">Kategori</th>
+                                    <th class="px-6 py-4">Status Akun</th>
+                                    <th class="px-6 py-4">Masa Berlaku</th>
+                                    <th class="px-6 py-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-800/60 font-medium">
+                            {{-- Menggunakan template Alpine untuk melakukan looping pada data yang sudah difilter dan dipaginate --}}
+                                <template x-for="(member, index) in paginatedMembers" :key="member.id">
+                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-colors duration-150">
+                                        {{-- Nomor Urut Dinamis --}}
+                                        <td class="px-6 py-4 text-center text-xs font-black text-gray-400 dark:text-gray-600" 
+                                            x-text="(page - 1) * perPage + index + 1">
+                                        </td>
+                                        
+                                        {{-- Nama Member --}}
+                                        <td class="px-6 py-4 font-bold text-gray-900 dark:text-white text-base" 
+                                            x-text="member.user.name">
+                                        </td>
+
+                                        {{-- Kategori --}}
+                                        <td class="px-6 py-4">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black tracking-wide uppercase"
+                                                :class="member.type == 'pelajar' 
+                                                    ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' 
+                                                    : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20'">
+                                                <span x-text="member.type"></span>
+                                            </span>
+                                        </td>
+
+                                        {{-- Status --}}
+                                        <td class="px-6 py-4">
+                                            <div class="flex flex-col gap-1">
+                                                <span class="text-sm font-black tracking-wider uppercase" 
+                                                    :class="member.status == 'active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                                                    x-text="member.status">
+                                                </span>
+                                                {{-- Cek apakah ada pembayaran pending --}}
+                                                <template x-if="member.payments && member.payments.length > 0 && member.payments[0].status == 'pending'">
+                                                    <span class="text-[9px] bg-yellow-500 text-black px-2 py-0.5 rounded-md font-black animate-pulse w-fit tracking-wide">
+                                                        <span x-text="member.status == 'active' ? 'ANTREAN PERPANJANGAN' : 'ANTREAN AKTIVASI'"></span>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </td>
+
+                                        {{-- Masa Berlaku --}}
+                                        <td class="px-6 py-4 text-xs font-mono font-bold text-gray-600 dark:text-gray-300">
+                                            <template x-if="member.membership_expiry">
+                                                <span class="flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                                    <span x-text="member.membership_expiry"></span>
+                                                </span>
+                                            </template>
+                                            <template x-if="!member.membership_expiry">
+                                                <span class="text-gray-400 dark:text-gray-600 italic">Belum Diaktivasi</span>
+                                            </template>
+                                        </td>
+
+                                        {{-- Aksi --}}
+                                        <td class="px-6 py-4 text-center">
+                                            <button @click="selectedMember = member; showModal = true" 
+                                                    class="inline-flex items-center text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-xs font-black tracking-wide transition duration-150 shadow-md uppercase">
+                                                Periksa Berkas &rarr;
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+
+                                {{-- Kondisi jika hasil pencarian kosong --}}
+                                <template x-if="filteredMembers.length === 0">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-12 text-center italic text-gray-400 dark:text-gray-600 font-bold">
+                                            Tidak ditemukan rekaman data anggota yang sesuai.
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                        <button @click="page--" :disabled="page == 1" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-bold disabled:opacity-50">Sebelumnya</button>
+                        <span class="text-xs font-bold text-gray-500">Halaman <span x-text="page"></span> dari <span x-text="totalPages || 1"></span></span>
+                        <button @click="page++" :disabled="page >= totalPages" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-bold disabled:opacity-50">Selanjutnya</button>
+                    </div>
                 </div>
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                    <button @click="page--" :disabled="page == 1" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-bold disabled:opacity-50">Sebelumnya</button>
-                    <span class="text-xs font-bold text-gray-500">Halaman <span x-text="page"></span> dari <span x-text="totalPages || 1"></span></span>
-                    <button @click="page++" :disabled="page >= totalPages" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-bold disabled:opacity-50">Selanjutnya</button>
-                </div>
+            </div>
+            
+            {{-- TAB 2: REGISTERED USER --}}
+            <div x-show="tab == 'registered'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+                <h3 class="font-bold text-gray-900 dark:text-white mb-4">Daftar User Belum Aktivasi Member</h3>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th class="px-6 py-4">Nama User</th>
+                            <th class="px-6 py-4">Email</th>
+                            <th class="px-6 py-4">Waktu Daftar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <template x-for="user in registeredUsers" :key="user.id">
+                            <tr>
+                                <td class="px-6 py-4 font-bold" x-text="user.name"></td>
+                                <td class="px-6 py-4" x-text="user.email"></td>
+                                <td class="px-6 py-4" x-text="new Date(user.created_at).toLocaleDateString()"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
             </div>
         </div>
 

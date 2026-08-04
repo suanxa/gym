@@ -46,23 +46,26 @@
         </div>
 
         {{-- Image Card Bagian Kanan --}}
-        <div class="relative w-full lg:w-[450px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 shrink-0">
-            <img src="https://images.unsplash.com/photo-1594882645126-14020914d58d?q=80&w=1000" class="w-full h-full object-cover">
-            
-            {{-- Floating Card Member (Filter: Active Only) --}}
-            <div class="absolute top-6 right-6 bg-red-600 text-white p-4 rounded-xl text-center">
-                <div class="text-xl font-black">{{ $activeMembers ?? 0 }}</div>
-                <div class="text-[9px] font-bold uppercase tracking-widest">MEMBER AKTIF</div>
-            </div>
+<div class="relative w-full lg:w-[450px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 shrink-0">
+    {{-- Mengambil path banner dari table settings --}}
+    <img src="{{ $siteSetting->banner ? asset('storage/' . $siteSetting->banner) : 'https://images.unsplash.com/photo-1594882645126-14020914d58d?q=80&w=1000' }}" 
+         class="w-full h-full object-cover"
+         alt="Banner Piai Futsal Fitness">
+    
+    {{-- Floating Card Member --}}
+    <div class="absolute top-6 right-6 bg-red-600 text-white p-4 rounded-xl text-center shadow-lg">
+        <div class="text-xl font-black">{{ $activeMembers ?? 0 }}</div>
+        <div class="text-[9px] font-bold uppercase tracking-widest">MEMBER AKTIF</div>
+    </div>
 
-            {{-- Floating Card Ranking --}}
-            <div class="absolute bottom-6 left-6 bg-[#1a1818]/90 backdrop-blur border border-white/10 p-4 rounded-xl flex items-center gap-3 text-white">
-                <div class="bg-red-600/20 p-2 rounded-lg text-red-500 text-xl">🏆</div>
-                <div>
-                    <div class="font-black text-sm">#1 RANKED</div>
-                    <div class="text-[9px] text-gray-400 font-bold uppercase">Fitness Center</div>
-                </div>
-            </div>
+    {{-- Floating Card Ranking --}}
+    <div class="absolute bottom-6 left-6 bg-[#1a1818]/90 backdrop-blur border border-white/10 p-4 rounded-xl flex items-center gap-3 text-white">
+        <div class="bg-red-600/20 p-2 rounded-lg text-red-500 text-xl">🏆</div>
+        <div>
+            <div class="font-black text-sm">#1 RANKED</div>
+            <div class="text-[9px] text-gray-400 font-bold uppercase">Fitness Center</div>
         </div>
+    </div>
+</div>
     </div>
 </section>

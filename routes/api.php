@@ -25,3 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user()->load('member');
     });
 });
+
+// Reset Password
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
